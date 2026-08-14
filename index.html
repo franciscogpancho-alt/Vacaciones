@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Vacaciones</title>
+<style>
+:root{
+  --bg:#f2f1ee;--surface:#fff;--border:#e0dfd8;
+  --text:#1a1a18;--text2:#6b6b67;--text3:#a8a7a0;
+  --accent:#378ADD;--green:#639922;--green-bg:#EAF3DE;--green-text:#27500A;
+  --red:#E24B4A;--red-bg:#FCEBEB;--red-text:#791F1F;
+  --warn-bg:#FAEEDA;--warn-border:#FAC775;--warn-text:#633806;
+  --radius:12px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;line-height:1.5}
+.page{min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:0.5px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-title{font-size:17px;font-weight:600}
+.topbar-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.content{flex:1;padding:16px}
+.section{display:none}.section.active{display:block}
+.card{background:var(--surface);border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:14px}
+.card-body{padding:18px}
+.card-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+label{font-size:14px;color:var(--text2);display:block;margin-bottom:6px}
+input,select{display:block;width:100%;height:48px;border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;font-size:16px;color:var(--text);background:var(--surface);-webkit-appearance:none;appearance:none;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #378ADD18}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b67' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.input-group{margin-bottom:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;border-radius:var(--radius-sm);font-size:16px;font-weight:600;cursor:pointer;border:none;transition:opacity .12s}
+.btn:active{opacity:.8}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:disabled{background:#b5d4f4;cursor:not-allowed}
+.btn-sm{height:34px;font-size:13px;font-weight:500;border-radius:var(--radius-sm);cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--text);padding:0 12px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-danger{height:34px;font-size:13px;font-weight:500;border-radius:var(--radius-sm);cursor:pointer;border:0.5px solid #F09595;background:var(--red-bg);color:var(--red-text);padding:0 12px;display:inline-flex;align-items:center}
+.btn-block-danger{display:flex;align-items:center;justify-content:center;width:100%;height:46px;border-radius:var(--radius-sm);cursor:pointer;border:0.5px solid #F09595;background:transparent;color:var(--red);font-size:15px;font-weight:500}
+.alert{border-radius:var(--radius-sm);padding:12px 14px;font-size:14px;margin-bottom:14px;display:none;line-height:1.5}
+.alert.show{display:block}
+.alert-ok{background:var(--green-bg);border:0.5px solid #C0DD97;color:var(--green-text)}
+.alert-err{background:var(--red-bg);border:0.5px solid #F7C1C1;color:var(--red-text)}
+.alert-warn{background:var(--warn-bg);border:0.5px solid var(--warn-border);color:var(--warn-text)}
+.conn-bar{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 14px;background:var(--surface);border-radius:var(--radius-sm);border:0.5px solid var(--border);margin-bottom:14px}
+.conn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.conn-dot.ok{background:var(--green)}.conn-dot.err{background:var(--red)}.conn-dot.spin{background:#FAC775;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.year-pills{display:flex;gap:8px;margin-bottom:16px}
+.year-pill{padding:7px 18px;border-radius:20px;font-size:14px;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--surface);color:var(--text2)}
+.year-pill.active{background:var(--text);color:#fff;border-color:var(--text)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.leg{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-box{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.stat-label{font-size:12px;color:var(--text2);margin-bottom:4px}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:0.5px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:500;border:none;background:transparent}
+.nav-item.active{color:var(--accent)}
+.nav-icon{font-size:20px;line-height:1}
+.has-nav{padding-bottom:80px}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lock-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;gap:14px}
+.lock-wrap h2{font-size:20px;font-weight:600}
+.lock-wrap p{font-size:15px;color:var(--text2)}
+.lock-form{width:100%;max-width:300px;display:flex;flex-direction:column;gap:10px}
+
+/* ===== CALENDARIO ===== */
+.month-section{margin-bottom:24px}
+.month-heading{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.quinc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qcard{border-radius:10px;border:0.5px solid var(--border);background:var(--surface);padding:11px 12px;min-height:88px;position:relative}
+.qcard.blocked{background:#f7f6f3;border-style:dashed;opacity:.6}
+.qcard.full{border-color:#F7C1C1;background:#fff8f8}
+.qcard.casi{border-color:var(--warn-border)}
+.qcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.qcard-q{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.04em}
+.qcap{font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;white-space:nowrap}
+.qcap-ok{background:var(--green-bg);color:var(--green-text)}
+.qcap-casi{background:var(--warn-bg);color:var(--warn-text)}
+.qcap-full{background:var(--red-bg);color:var(--red-text)}
+.qcap-blocked{background:#ebebeb;color:#888}
+.qcard-dates{font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px}
+.qcard-people{display:flex;flex-direction:column;gap:3px}
+.qperson{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 7px;border-radius:7px}
+.qavatar{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0;color:#fff}
+.blocked-label{font-size:11px;color:#888;margin-top:4px;font-style:italic}
+
+/* meses bloqueados config */
+.month-toggle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.month-toggle{padding:10px 6px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;text-align:center;color:var(--text2)}
+.month-toggle.blocked{background:var(--red-bg);border-color:#F09595;color:var(--red-text)}
+
+/* lista admin */
+.list-item{padding:13px 0;border-bottom:0.5px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.list-item:last-child{border:none}
+.li-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.li-info{font-size:12px;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- ===== VISTA EMPLEADO ===== -->
+<div id="app-empleado" class="page" style="display:none">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="emp-title">Vacaciones</div>
+      <div class="topbar-sub">Elegí tu quincena</div>
+    </div>
+    <button class="btn-sm" onclick="location.href=location.pathname+'?admin'">Admin</button>
+  </div>
+  <div class="content">
+    <div class="conn-bar" id="emp-conn-bar">
+      <div class="conn-dot spin" id="emp-conn-dot"></div>
+      <span id="emp-conn-txt">Cargando...</span>
+      <button class="btn-sm" style="margin-left:auto;height:26px;font-size:12px" onclick="cargarDatos(false)">↺</button>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="card-label">Registrar vacaciones</div>
+        <div id="alert-emp" class="alert"></div>
+        <div class="input-group">
+          <label>Tu nombre completo</label>
+          <input type="text" id="emp-nombre" placeholder="Ej: Juan García" autocomplete="name"/>
+        </div>
+        <div class="input-group">
+          <label>Quincena de vacaciones</label>
+          <select id="emp-quinc"></select>
+        </div>
+        <button class="btn btn-primary" id="btn-reg" onclick="registrarEmpleado()">Confirmar quincena</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="card-label">Disponibilidad del equipo</div>
+        <div class="legend" id="emp-legend"></div>
+        <div class="year-pills" id="emp-years"></div>
+        <div id="emp-cal"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOCK ===== -->
+<div id="app-lock" style="display:none">
+  <div class="lock-wrap">
+    <div style="font-size:44px">🔒</div>
+    <h2>Administrador</h2>
+    <p>Ingresá la contraseña</p>
+    <div class="lock-form">
+      <input type="password" id="lock-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')checkPass()"/>
+      <button class="btn btn-primary" onclick="checkPass()">Entrar</button>
+    </div>
+    <div id="lock-alert" class="alert alert-err" style="max-width:300px"></div>
+    <button class="btn-sm" style="margin-top:4px" onclick="location.href=location.pathname">← Volver</button>
+  </div>
+</div>
+
+<!-- ===== ADMIN ===== -->
+<div id="app-admin" class="page has-nav" style="display:none">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="adm-title">Vacaciones</div>
+      <div class="topbar-sub" style="color:#0C447C;font-weight:500">Administrador</div>
+    </div>
+    <button class="btn-sm" style="color:var(--red);border-color:#F09595" onclick="logout()">Salir</button>
+  </div>
+  <div class="content">
+
+    <!-- RESUMEN -->
+    <div id="atab-resumen" class="section active">
+      <div class="conn-bar" id="adm-conn-bar">
+        <div class="conn-dot spin" id="adm-conn-dot"></div>
+        <span id="adm-conn-txt">Cargando...</span>
+        <button class="btn-sm" style="margin-left:auto;height:26px;font-size:12px" onclick="cargarDatos(true)">↺</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Registros</div><div class="stat-val" id="s-total">0</div></div>
+        <div class="stat-box"><div class="stat-label">Empleados</div><div class="stat-val" id="s-emps">0</div></div>
+        <div class="stat-box"><div class="stat-label">Quincenas llenas</div><div class="stat-val" id="s-llenas" style="color:var(--red)">0</div></div>
+        <div class="stat-box"><div class="stat-label">Quincenas ocupadas</div><div class="stat-val" id="s-ocup">0</div></div>
+      </div>
+      <button class="btn-sm" style="margin-bottom:12px" onclick="exportarExcel()">↓ Exportar Excel</button>
+      <div class="card"><div class="card-body" style="padding:12px 16px"><div id="resumen-list"></div></div></div>
+    </div>
+
+    <!-- CALENDARIO -->
+    <div id="atab-calendario" class="section">
+      <div class="legend" id="adm-legend"></div>
+      <div class="year-pills" id="adm-years"></div>
+      <div id="adm-cal"></div>
+    </div>
+
+    <!-- LISTA -->
+    <div id="atab-lista" class="section">
+      <div class="card"><div class="card-body" style="padding:12px 16px"><div id="lista-adm"></div></div></div>
+    </div>
+
+    <!-- CONFIG -->
+    <div id="atab-config" class="section">
+      <div class="card">
+        <div class="card-body">
+          <div class="card-label">General</div>
+          <div class="input-group">
+            <label>Nombre de la empresa</label>
+            <input type="text" id="cfg-titulo" placeholder="Ej: Electricidad SA"/>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:14px">
+            <div style="flex:1"><label>Primer año</label><input type="text" id="cfg-a1"/></div>
+            <div style="flex:1"><label>Segundo año</label><input type="text" id="cfg-a2"/></div>
+          </div>
+          <div class="input-group">
+            <label>Máximo de personas por quincena</label>
+            <input type="number" id="cfg-max" min="1" max="99"/>
+          </div>
+          <div class="input-group">
+            <label>Cuando se alcanza el máximo</label>
+            <select id="cfg-modo">
+              <option value="block">Bloquear — no permitir más inscriptos</option>
+              <option value="warn">Advertir pero permitir igual</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="card-label">Meses bloqueados</div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:10px">Tocá los meses en los que los empleados <strong>no pueden</strong> solicitar vacaciones.</p>
+          <div class="month-toggle-grid" id="month-toggles"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="card-label">Conexión</div>
+          <div class="input-group">
+            <label>URL del script de Google Sheets</label>
+            <input type="text" id="cfg-sheets" placeholder="https://script.google.com/macros/s/..."/>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="card-label">Contraseña admin</div>
+          <div class="input-group"><label>Nueva contraseña</label><input type="password" id="cfg-p1" placeholder="Mínimo 4 caracteres"/></div>
+          <div class="input-group"><label>Confirmar</label><input type="password" id="cfg-p2" placeholder="Repetí la contraseña"/></div>
+        </div>
+      </div>
+
+      <div id="alert-cfg" class="alert"></div>
+      <button class="btn btn-primary" onclick="guardarConfig()" style="margin-bottom:10px">Guardar cambios</button>
+      <button class="btn-block-danger" onclick="borrarTodo()">Borrar todos los registros</button>
+    </div>
+
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-item active" id="nav-resumen" onclick="showTab('resumen')"><span class="nav-icon">📊</span>Resumen</button>
+    <button class="nav-item" id="nav-calendario" onclick="showTab('calendario')"><span class="nav-icon">📅</span>Calendario</button>
+    <button class="nav-item" id="nav-lista" onclick="showTab('lista')"><span class="nav-icon">📋</span>Lista</button>
+    <button class="nav-item" id="nav-config" onclick="showTab('config')"><span class="nav-icon">⚙️</span>Config</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ================================================
+   DATOS BASE
+================================================ */
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+const PALETTE = [
+  {hex:'#378ADD',bg:'#E6F1FB',text:'#0C447C'},
+  {hex:'#639922',bg:'#EAF3DE',text:'#27500A'},
+  {hex:'#D4537E',bg:'#FBEAF0',text:'#72243E'},
+  {hex:'#BA7517',bg:'#FAEEDA',text:'#633806'},
+  {hex:'#7F77DD',bg:'#EEEDFE',text:'#3C3489'},
+  {hex:'#1D9E75',bg:'#E1F5EE',text:'#085041'},
+  {hex:'#D85A30',bg:'#FAECE7',text:'#712B13'},
+  {hex:'#C4528A',bg:'#F9E8F2',text:'#6A1B4D'},
+  {hex:'#2E8B8B',bg:'#E0F5F5',text:'#0D4A4A'},
+  {hex:'#888780',bg:'#F1EFE8',text:'#444441'},
+];
+
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwOwXpiiigqeNde31z4wHF_p4uOq1twARuoAt85-t96sV7ju-6UDTPJ_disVTrIZ86q8A/exec';
+const CFG_KEY = 'vac_cfg_v6';
+const LOC_KEY = 'vac_loc_v6';
+
+/* ================================================
+   ESTADO GLOBAL
+   vacaciones = array de objetos:
+   { emp: string, quinc: string, fecha: string, ts: string }
+   quinc = "AAAA-MM-Q"  ej: "2025-11-1" = 1ra quincena Nov 2025
+================================================ */
+let cfg = cargarCfg();
+let VAC = [];          // fuente de verdad en memoria
+let colorMap = {};
+let colorIdx = 0;
+let yearEmp, yearAdm;
+
+/* ================================================
+   CONFIG
+================================================ */
+function cargarCfg() {
+  try { const r = localStorage.getItem(CFG_KEY); if (r) return JSON.parse(r); } catch(e) {}
+  return {
+    titulo: 'Vacaciones',
+    anio1: new Date().getFullYear(),
+    anio2: new Date().getFullYear() + 1,
+    maxPersonas: 3,
+    modo: 'block',
+    mesesBloqueados: [],   // array de números 0-11
+    pass: 'admin123',
+    sheetsUrl: ''
+  };
+}
+function guardarCfgLocal() { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }
+function cargarVacLocal() { try { return JSON.parse(localStorage.getItem(LOC_KEY) || '[]'); } catch(e) { return []; } }
+function guardarVacLocal(arr) { localStorage.setItem(LOC_KEY, JSON.stringify(arr)); }
+
+function getUrl() { return SHEETS_URL || cfg.sheetsUrl || ''; }
+function getMax() { return parseInt(cfg.maxPersonas) || 3; }
+function esMesBloqueado(mes) { return (cfg.mesesBloqueados || []).includes(mes); }
+
+/* ================================================
+   QUINCENAS
+   Estructura de key: "AAAA-MM-Q"
+   MM = 01-12, Q = 1 o 2
+================================================ */
+function quincenasDelAnio(anio) {
+  const list = [];
+  for (let m = 0; m < 12; m++) {
+    const s1 = new Date(anio, m, 1),  e1 = new Date(anio, m, 15);
+    const s2 = new Date(anio, m, 16), e2 = new Date(anio, m + 1, 0);
+    const fmt = d => d.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit'});
+    const mm = String(m + 1).padStart(2, '0');
+    list.push({
+      key:  `${anio}-${mm}-1`,
+      anio, mes: m, q: 1,
+      label: `1ª quincena ${MESES[m]} ${anio} (${fmt(s1)}–${fmt(e1)})`,
+      short: `1ª quinc. ${MESES[m]} ${anio}`,
+      rango: `${fmt(s1)}–${fmt(e1)}`,
+      desde: fmt(s1), hasta: fmt(e1),
+      start: s1, end: e1
+    });
+    list.push({
+      key:  `${anio}-${mm}-2`,
+      anio, mes: m, q: 2,
+      label: `2ª quincena ${MESES[m]} ${anio} (${fmt(s2)}–${fmt(e2)})`,
+      short: `2ª quinc. ${MESES[m]} ${anio}`,
+      rango: `${fmt(s2)}–${fmt(e2)}`,
+      desde: fmt(s2), hasta: fmt(e2),
+      start: s2, end: e2
+    });
+  }
+  return list;
+}
+
+function todasLasQuincenas() {
+  return [...quincenasDelAnio(cfg.anio1), ...quincenasDelAnio(cfg.anio2)];
+}
+
+function getAnios() { return [cfg.anio1, cfg.anio2]; }
+
+function findQ(key) { return todasLasQuincenas().find(q => q.key === key) || null; }
+
+/* ================================================
+   COLORES
+================================================ */
+function getColor(emp) {
+  if (!colorMap[emp]) { colorMap[emp] = PALETTE[colorIdx % PALETTE.length]; colorIdx++; }
+  return colorMap[emp];
+}
+function rebuildColors() {
+  colorMap = {}; colorIdx = 0;
+  [...new Set(VAC.map(v => v.emp))].sort().forEach(e => getColor(e));
+}
+
+function iniciales(emp) {
+  return emp.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+}
+
+/* ================================================
+   SHEETS / LOCAL
+================================================ */
+async function cargarDatos(esAdmin) {
+  const url = getUrl();
+  if (!url || !url.startsWith('https://')) {
+    VAC = cargarVacLocal();
+    setConn(false, 'Sin Sheets — datos locales', esAdmin);
+    afterCargar(esAdmin);
+    return;
+  }
+  setConn(null, 'Cargando...', esAdmin);
+  try {
+    const r = await fetch(url + '?action=get', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    // Sheets devuelve: [{emp, quinc, fecha, ts}]
+    VAC = data.filter(v => v.emp && v.quinc);
+    setConn(true, 'Conectado · tiempo real', esAdmin);
+  } catch(e) {
+    VAC = cargarVacLocal();
+    setConn(false, 'Sin conexión — locales', esAdmin);
+  }
+  afterCargar(esAdmin);
+}
+
+async function escribirRegistro(reg) {
+  // reg = {emp, quinc, fecha, ts}
+  const url = getUrl();
+  if (!url || !url.startsWith('https://')) {
+    const loc = cargarVacLocal();
+    loc.push(reg);
+    guardarVacLocal(loc);
+    VAC = loc;
+    return;
+  }
+  try {
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'add', emp: reg.emp, quinc: reg.quinc, fecha: reg.fecha, ts: reg.ts })
+    });
+  } catch(e) {}
+  // agregar en memoria para respuesta inmediata
+  VAC.push(reg);
+}
+
+async function borrarRegistro(emp, quinc) {
+  // quitar de memoria primero (respuesta inmediata)
+  VAC = VAC.filter(v => !(v.emp === emp && v.quinc === quinc));
+  guardarVacLocal(VAC);
+
+  const url = getUrl();
+  if (!url || !url.startsWith('https://')) return;
+  try {
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', emp, quinc })
+    });
+  } catch(e) {}
+}
+
+async function borrarTodoSheets() {
+  guardarVacLocal([]);
+  VAC = [];
+  const url = getUrl();
+  if (!url || !url.startsWith('https://')) return;
+  try {
+    await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'deleteAll' })
+    });
+  } catch(e) {}
+}
+
+function afterCargar(esAdmin) {
+  rebuildColors();
+  if (esAdmin) {
+    renderResumen();
+  } else {
+    renderYearPills('emp-years', 'emp', yearEmp);
+    renderCalendario('emp-cal', yearEmp);
+    renderLeyenda('emp-legend');
+  }
+}
+
+function setConn(ok, txt, esAdmin) {
+  const pre = esAdmin ? 'adm' : 'emp';
+  const bar = document.getElementById(pre + '-conn-bar');
+  if (!bar) return;
+  bar.style.display = 'flex';
+  const dot = document.getElementById(pre + '-conn-dot');
+  dot.className = 'conn-dot ' + (ok === true ? 'ok' : ok === false ? 'err' : 'spin');
+  document.getElementById(pre + '-conn-txt').textContent = txt;
+}
+
+/* ================================================
+   ROUTER
+================================================ */
+function route() {
+  if (location.search.includes('admin') || location.hash === '#admin') {
+    document.getElementById('app-lock').style.display = 'block';
+  } else {
+    document.getElementById('app-empleado').style.display = 'flex';
+    document.getElementById('emp-title').textContent = cfg.titulo || 'Vacaciones';
+    document.title = cfg.titulo || 'Vacaciones';
+    [yearEmp] = getAnios();
+    poblarSelect();
+    cargarDatos(false);
+  }
+}
+
+/* ================================================
+   LOCK
+================================================ */
+function checkPass() {
+  if (document.getElementById('lock-pass').value === cfg.pass) {
+    document.getElementById('app-lock').style.display = 'none';
+    document.getElementById('app-admin').style.display = 'flex';
+    document.getElementById('adm-title').textContent = cfg.titulo || 'Vacaciones';
+    [yearAdm] = getAnios();
+    cargarCfgForm();
+    cargarDatos(true);
+  } else {
+    const a = document.getElementById('lock-alert');
+    a.textContent = 'Contraseña incorrecta.';
+    a.classList.add('show');
+    setTimeout(() => a.classList.remove('show'), 2500);
+  }
+}
+function logout() { location.href = location.pathname; }
+
+/* ================================================
+   TABS ADMIN
+================================================ */
+function showTab(tab) {
+  ['resumen','calendario','lista','config'].forEach(t => {
+    document.getElementById('atab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('nav-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'calendario') {
+    renderLeyenda('adm-legend');
+    renderYearPills('adm-years', 'adm', yearAdm);
+    renderCalendario('adm-cal', yearAdm);
+  }
+  if (tab === 'lista') renderLista();
+  if (tab === 'resumen') renderResumen();
+}
+
+/* ================================================
+   SELECT QUINCENAS (solo las no bloqueadas)
+================================================ */
+function poblarSelect() {
+  const sel = document.getElementById('emp-quinc');
+  sel.innerHTML = '';
+  todasLasQuincenas()
+    .filter(q => !esMesBloqueado(q.mes))
+    .forEach(q => {
+      const o = document.createElement('option');
+      o.value = q.key;
+      o.textContent = q.label;
+      sel.appendChild(o);
+    });
+  if (!sel.options.length) {
+    const o = document.createElement('option');
+    o.textContent = 'Sin quincenas disponibles';
+    sel.appendChild(o);
+  }
+}
+
+/* ================================================
+   YEAR PILLS
+================================================ */
+function renderYearPills(id, ctx, active) {
+  const c = document.getElementById(id); if (!c) return;
+  c.innerHTML = getAnios().map(y =>
+    `<button class="year-pill${y === active ? ' active' : ''}" onclick="switchYear('${ctx}',${y})">${y}</button>`
+  ).join('');
+}
+function switchYear(ctx, y) {
+  if (ctx === 'emp') { yearEmp = y; renderYearPills('emp-years','emp',y); renderCalendario('emp-cal',y); renderLeyenda('emp-legend'); }
+  else               { yearAdm = y; renderYearPills('adm-years','adm',y); renderCalendario('adm-cal',y); renderLeyenda('adm-legend'); }
+}
+
+/* ================================================
+   CALENDARIO — renderizado de quincenas con nombres
+================================================ */
+function renderCalendario(id, anio) {
+  const cal = document.getElementById(id); if (!cal) return;
+  cal.innerHTML = '';
+  const max = getMax();
+
+  quincenasDelAnio(anio).reduce((acc, q) => {
+    // agrupar por mes
+    if (!acc[q.mes]) acc[q.mes] = [];
+    acc[q.mes].push(q);
+    return acc;
+  }, {});
+
+  // iterar meses
+  for (let m = 0; m < 12; m++) {
+    const bloqueado = esMesBloqueado(m);
+    const qs = quincenasDelAnio(anio).filter(q => q.mes === m);
+
+    const sec = document.createElement('div');
+    sec.className = 'month-section';
+    sec.innerHTML = `<div class="month-heading">${MESES[m]} ${anio}${bloqueado ? ' 🔒' : ''}</div>`;
+
+    const grid = document.createElement('div');
+    grid.className = 'quinc-grid';
+
+    qs.forEach(q => {
+      // personas en esta quincena
+      const taken = VAC.filter(v => v.quinc === q.key);
+      const count = taken.length;
+      const lleno = count >= max;
+      const casi  = !lleno && count === max - 1 && max > 1;
+
+      const card = document.createElement('div');
+      let cls = 'qcard';
+      if (bloqueado) cls += ' blocked';
+      else if (lleno) cls += ' full';
+      else if (casi)  cls += ' casi';
+      card.className = cls;
+
+      // badge capacidad
+      let capCls, capTxt;
+      if (bloqueado)      { capCls = 'qcap-blocked'; capTxt = 'Bloqueado'; }
+      else if (lleno)     { capCls = 'qcap-full';    capTxt = `Lleno ${count}/${max}`; }
+      else if (casi)      { capCls = 'qcap-casi';    capTxt = `${count}/${max}`; }
+      else if (count > 0) { capCls = 'qcap-ok';      capTxt = `${count}/${max}`; }
+      else                { capCls = 'qcap-ok';      capTxt = `Libre`; }
+
+      // HTML personas — cada persona en su propia línea con color
+      let peopleHTML = '';
+      if (taken.length && !bloqueado) {
+        const chips = taken.map(v => {
+          const c = getColor(v.emp);
+          const ini = iniciales(v.emp);
+          const nombre = v.emp.split(' ')[0]; // solo primer nombre
+          return `<div class="qperson" style="background:${c.bg};color:${c.text}">
+            <div class="qavatar" style="background:${c.hex}">${ini}</div>${nombre}
+          </div>`;
+        }).join('');
+        peopleHTML = `<div class="qcard-people">${chips}</div>`;
+      }
+
+      if (bloqueado) {
+        peopleHTML = `<div class="blocked-label">No disponible</div>`;
+      }
+
+      card.innerHTML = `
+        <div class="qcard-top">
+          <span class="qcard-q">${q.q === 1 ? '1ª' : '2ª'} QUINC.</span>
+          <span class="qcap ${capCls}">${capTxt}</span>
+        </div>
+        <div class="qcard-dates">${q.rango}</div>
+        ${peopleHTML}`;
+
+      grid.appendChild(card);
+    });
+
+    sec.appendChild(grid);
+    cal.appendChild(sec);
+  }
+}
+
+function renderLeyenda(id) {
+  const el = document.getElementById(id); if (!el) return;
+  const entries = Object.entries(colorMap);
+  el.innerHTML = entries.length
+    ? entries.map(([emp, c]) =>
+        `<div class="leg"><div class="leg-dot" style="background:${c.hex}"></div>${emp}</div>`
+      ).join('')
+    : '';
+}
+
+/* ================================================
+   REGISTRO EMPLEADO
+================================================ */
+async function registrarEmpleado() {
+  const emp = document.getElementById('emp-nombre').value.trim();
+  const quincKey = document.getElementById('emp-quinc').value;
+  const alertEl = document.getElementById('alert-emp');
+  const btn = document.getElementById('btn-reg');
+
+  if (!emp) { mostrarAlerta(alertEl, 'Ingresá tu nombre.', 'err'); return; }
+  if (!quincKey) { mostrarAlerta(alertEl, 'Seleccioná una quincena.', 'err'); return; }
+
+  // verificar mes bloqueado
+  const q = findQ(quincKey);
+  if (!q) { mostrarAlerta(alertEl, 'Quincena inválida.', 'err'); return; }
+  if (esMesBloqueado(q.mes)) { mostrarAlerta(alertEl, 'Ese mes no está disponible para vacaciones.', 'err'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Verificando...';
+
+  await cargarDatos(false); // datos frescos antes de validar
+
+  // ya registrado
+  const dup = VAC.find(v => v.emp.toLowerCase() === emp.toLowerCase() && v.quinc === quincKey);
+  if (dup) { mostrarAlerta(alertEl, 'Ya tenés esa quincena registrada.', 'err'); resetBtn(); return; }
+
+  const taken = VAC.filter(v => v.quinc === quincKey);
+  const max = getMax();
+
+  if (taken.length >= max && cfg.modo === 'block') {
+    mostrarAlerta(alertEl, `Esa quincena ya tiene el máximo de ${max} persona${max !== 1 ? 's' : ''}. Elegí otra.`, 'err');
+    resetBtn(); return;
+  }
+
+  if (taken.length >= max && cfg.modo === 'warn') {
+    const noms = taken.map(v => v.emp).join(', ');
+    alertEl.innerHTML = `La quincena ya tiene ${taken.length} persona${taken.length !== 1 ? 's' : ''} (${noms}). ¿Confirmás?<br>
+      <button class="btn btn-primary" style="height:40px;margin-top:10px;font-size:14px"
+        onclick="confirmarRegistro('${emp.replace(/'/g,"\\'")}','${quincKey}')">Sí, confirmar</button>`;
+    alertEl.className = 'alert alert-warn show';
+    resetBtn(); return;
+  }
+
+  await confirmarRegistro(emp, quincKey);
+}
+
+async function confirmarRegistro(emp, quincKey) {
+  const btn = document.getElementById('btn-reg');
+  const alertEl = document.getElementById('alert-emp');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Guardando...';
+
+  const ts = new Date().toISOString();
+  const fecha = new Date().toLocaleDateString('es-AR');
+  await escribirRegistro({ emp, quinc: quincKey, fecha, ts });
+
+  rebuildColors();
+  renderCalendario('emp-cal', yearEmp);
+  renderLeyenda('emp-legend');
+  resetBtn();
+  alertEl.className = 'alert';
+  document.getElementById('emp-nombre').value = '';
+
+  const q = findQ(quincKey);
+  mostrarAlerta(alertEl,
+    `✓ ${q ? q.short : quincKey} registrada correctamente.`, 'ok');
+}
+
+function resetBtn() {
+  const btn = document.getElementById('btn-reg');
+  btn.disabled = false; btn.textContent = 'Confirmar quincena';
+}
+
+/* ================================================
+   ADMIN — RESUMEN
+================================================ */
+function renderResumen() {
+  const max = getMax();
+  const quincsUnicas = [...new Set(VAC.map(v => v.quinc))];
+  const llenas = quincsUnicas.filter(qk => VAC.filter(v => v.quinc === qk).length >= max);
+  document.getElementById('s-total').textContent  = VAC.length;
+  document.getElementById('s-emps').textContent   = new Set(VAC.map(v => v.emp)).size;
+  document.getElementById('s-llenas').textContent = llenas.length;
+  document.getElementById('s-ocup').textContent   = quincsUnicas.length;
+
+  const el = document.getElementById('resumen-list');
+  if (!VAC.length) { el.innerHTML = '<p style="font-size:14px;color:var(--text2);padding:8px 0">Sin registros aún.</p>'; return; }
+
+  const byEmp = {};
+  VAC.forEach(v => { byEmp[v.emp] = byEmp[v.emp] || []; byEmp[v.emp].push(v.quinc); });
+
+  el.innerHTML = Object.entries(byEmp)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([emp, quincs]) => {
+      const c = getColor(emp);
+      const txt = quincs
+        .sort()
+        .map(qk => { const q = findQ(qk); return q ? q.short : qk; })
+        .join(' · ');
+      return `<div class="list-item">
+        <div>
+          <div class="li-name" style="color:${c.text}">${emp}</div>
+          <div class="li-info">${txt}</div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+/* ================================================
+   ADMIN — LISTA CON BORRADO INDIVIDUAL
+================================================ */
+function renderLista() {
+  const el = document.getElementById('lista-adm');
+  if (!VAC.length) {
+    el.innerHTML = '<p style="font-size:14px;color:var(--text2);padding:8px 0">Sin registros.</p>';
+    return;
+  }
+
+  // ordenar: primero por quincena (cronológico), luego por ts
+  const sorted = [...VAC].sort((a, b) => {
+    if (a.quinc !== b.quinc) return a.quinc.localeCompare(b.quinc);
+    return (a.ts || '').localeCompare(b.ts || '');
+  });
+
+  el.innerHTML = sorted.map((v, idx) => {
+    const q = findQ(v.quinc);
+    const max = getMax();
+    const llena = VAC.filter(x => x.quinc === v.quinc).length >= max;
+    // Escapar el nombre para usarlo en onclick
+    const empEsc = v.emp.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const quincEsc = v.quinc; // ya es string seguro
+    return `<div class="list-item" id="li-${idx}">
+      <div style="flex:1;min-width:0">
+        <div class="li-name">${v.emp}</div>
+        <div class="li-info">${q ? q.short + ' · ' + q.rango : v.quinc}</div>
+        <div class="li-info" style="font-size:11px;margin-top:2px">Registrado: ${v.fecha || '—'}${llena ? ' · 🔴 llena' : ''}</div>
+      </div>
+      <button class="btn-danger" onclick="eliminarRegistro('${empEsc}','${quincEsc}',${idx})">Eliminar</button>
+    </div>`;
+  }).join('');
+}
+
+async function eliminarRegistro(emp, quinc, idx) {
+  if (!confirm(`¿Eliminar la quincena de ${emp}?`)) return;
+  await borrarRegistro(emp, quinc);
+  rebuildColors();
+  // re-render inmediato sin esperar a Sheets
+  renderLista();
+  renderResumen();
+  renderLeyenda('adm-legend');
+  renderCalendario('adm-cal', yearAdm);
+}
+
+/* ================================================
+   CONFIG
+================================================ */
+function cargarCfgForm() {
+  document.getElementById('cfg-titulo').value = cfg.titulo || '';
+  document.getElementById('cfg-a1').value = cfg.anio1 || '';
+  document.getElementById('cfg-a2').value = cfg.anio2 || '';
+  document.getElementById('cfg-max').value = cfg.maxPersonas || 3;
+  document.getElementById('cfg-modo').value = cfg.modo || 'block';
+  document.getElementById('cfg-sheets').value = cfg.sheetsUrl || '';
+  renderMonthToggles();
+}
+
+function renderMonthToggles() {
+  const grid = document.getElementById('month-toggles');
+  const bloq = cfg.mesesBloqueados || [];
+  grid.innerHTML = MESES.map((m, i) =>
+    `<button class="month-toggle${bloq.includes(i) ? ' blocked' : ''}" onclick="toggleMes(${i})">${m}</button>`
+  ).join('');
+}
+
+function toggleMes(i) {
+  const bloq = cfg.mesesBloqueados || [];
+  const idx = bloq.indexOf(i);
+  if (idx === -1) bloq.push(i);
+  else bloq.splice(idx, 1);
+  cfg.mesesBloqueados = bloq;
+  renderMonthToggles();
+}
+
+function guardarConfig() {
+  const titulo = document.getElementById('cfg-titulo').value.trim();
+  const anio1  = parseInt(document.getElementById('cfg-a1').value) || new Date().getFullYear();
+  const anio2  = parseInt(document.getElementById('cfg-a2').value) || anio1 + 1;
+  const maxP   = parseInt(document.getElementById('cfg-max').value) || 3;
+  const modo   = document.getElementById('cfg-modo').value;
+  const sheets = document.getElementById('cfg-sheets').value.trim();
+  const p1     = document.getElementById('cfg-p1').value;
+  const p2     = document.getElementById('cfg-p2').value;
+  const alertEl = document.getElementById('alert-cfg');
+
+  if (p1) {
+    if (p1 !== p2) { mostrarAlerta(alertEl, 'Las contraseñas no coinciden.', 'err'); return; }
+    if (p1.length < 4) { mostrarAlerta(alertEl, 'Mínimo 4 caracteres.', 'err'); return; }
+    cfg.pass = p1;
+    document.getElementById('cfg-p1').value = '';
+    document.getElementById('cfg-p2').value = '';
+  }
+
+  cfg = { ...cfg, titulo, anio1, anio2, maxPersonas: maxP, modo, sheetsUrl: sheets };
+  guardarCfgLocal();
+  document.getElementById('adm-title').textContent = titulo || 'Vacaciones';
+  mostrarAlerta(alertEl, 'Configuración guardada.', 'ok');
+  if (sheets) cargarDatos(true);
+}
+
+async function borrarTodo() {
+  if (!confirm('¿Borrar TODOS los registros? No se puede deshacer.')) return;
+  await borrarTodoSheets();
+  rebuildColors();
+  renderResumen();
+  renderLista();
+  renderCalendario('adm-cal', yearAdm);
+  renderLeyenda('adm-legend');
+  mostrarAlerta(document.getElementById('alert-cfg'), 'Todos los registros fueron eliminados.', 'ok');
+}
+
+/* ================================================
+   EXCEL — ordenado por quincena y luego por ts
+================================================ */
+function exportarExcel() {
+  if (!VAC.length) { alert('No hay registros para exportar.'); return; }
+
+  const sorted = [...VAC].sort((a, b) => {
+    if (a.quinc !== b.quinc) return a.quinc.localeCompare(b.quinc);
+    return (a.ts || '').localeCompare(b.ts || '');
+  });
+
+  const wb = XLSX.utils.book_new();
+
+  // Hoja 1: detalle por registro
+  const rows = [['Quincena','Mes','Año','Desde','Hasta','Empleado','Fecha de registro']];
+  sorted.forEach(v => {
+    const q = findQ(v.quinc);
+    rows.push([
+      q ? q.short : v.quinc,
+      q ? MESES[q.mes] : '',
+      q ? q.anio : '',
+      q ? q.desde : '',
+      q ? q.hasta : '',
+      v.emp,
+      v.fecha || ''
+    ]);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet(rows);
+  ws1['!cols'] = [{wch:22},{wch:14},{wch:8},{wch:12},{wch:12},{wch:24},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Registros');
+
+  // Hoja 2: resumen por quincena
+  const max = getMax();
+  const rows2 = [['Quincena','Mes','Año','Desde','Hasta','Empleados','Cant.','Estado']];
+  todasLasQuincenas().forEach(q => {
+    const t = VAC.filter(v => v.quinc === q.key);
+    if (!t.length) return;
+    const estado = t.length >= max ? 'LLENA' : t.length === max - 1 ? 'Casi llena' : 'Disponible';
+    rows2.push([q.short, MESES[q.mes], q.anio, q.desde, q.hasta,
+      t.map(x => x.emp).join(', '), t.length, estado]);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(rows2);
+  ws2['!cols'] = [{wch:22},{wch:14},{wch:8},{wch:12},{wch:12},{wch:32},{wch:8},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Por quincena');
+
+  XLSX.writeFile(wb, `vacaciones_${cfg.anio1}_${cfg.anio2}.xlsx`);
+}
+
+/* ================================================
+   HELPERS
+================================================ */
+function mostrarAlerta(el, msg, tipo) {
+  el.textContent = msg;
+  el.className = `alert alert-${tipo} show`;
+  if (tipo !== 'warn') setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+/* ================================================
+   BOOT
+================================================ */
+route();
+</script>
+</body>
+</html>
